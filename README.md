@@ -1,4 +1,4 @@
-# Real-Time-License-Plate-Detection-and-Recognition-Using-Machine-Learning
+# Real-Time-License-Plate-Detection-Using-ML
 
 This project develops an intelligent system for detecting and recognizing vehicle license plates in real-time, leveraging the Florence 2 model for robust image processing and TensorFlow for machine learning. The system processes input video streams or images to identify license plates and extract text information using Optical Character Recognition (OCR).  
 
