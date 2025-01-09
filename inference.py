@@ -54,6 +54,7 @@ class LicensePlate(metaclass=SingletonMeta):
         # Format OCR result
         ocr_result_dict = json.loads(result[0].replace("'", '"')) 
         ocr_text = ocr_result_dict['<OCR>']
+        print(f'detected text: {ocr_text}')
         return ocr_text
     
     def detect_license(self, image):
