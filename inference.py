@@ -33,7 +33,7 @@ class LicensePlate(metaclass=SingletonMeta):
         # Initialize the models and processors
         self.device = select_pytorch_device()
         # Load the YOLO model 
-        self.license_model = YOLO(r"model_weights\licence_weights.pt").to(self.device)
+        self.license_model = YOLO(r"C:/Workspace/chungvodim/model/yolov8/train8/weights/best.pt").to(self.device)
         self.client = Client("gokaygokay/Florence-2")
 
     def run_ocr(self, image):
