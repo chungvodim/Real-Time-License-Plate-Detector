@@ -36,26 +36,37 @@ class LicensePlate(metaclass=SingletonMeta):
         self.license_model = YOLO(r"C:/Workspace/chungvodim/model/yolov8/train8/weights/best.pt").to(self.device)
         self.client = Client("gokaygokay/Florence-2")
 
-    def run_ocr(self, image):
-        # Create tempfile as florence ocr requires image filepath or url to run 
-        temp_file = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
-        temp_file_path = temp_file.name
-        cv2.imwrite(temp_file_path, image)
-        temp_file.close()
-        # Run ocr on cropped licence plate
-        result = self.client.predict(
-                        image=handle_file(temp_file_path),
-                        task_prompt="OCR",
-                        text_input=None,
-                        model_id="microsoft/Florence-2-large",
-                        api_name="/process_image"
-                        )
-        Path(temp_file_path).unlink() # Delete tempfile
-        # Format OCR result
-        ocr_result_dict = json.loads(result[0].replace("'", '"')) 
-        ocr_text = ocr_result_dict['<OCR>']
-        print(f'detected text: {ocr_text}')
-        return ocr_text
+    def image_to_text(self, image):
+        try:
+            # Create tempfile as florence ocr requires image filepath or url to run 
+            temp_file = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
+            temp_file_path = temp_file.name
+            cv2.imwrite(temp_file_path, image)
+            temp_file.close()
+            # Run ocr on cropped licence plate
+            result = self.client.predict(
+                            image=handle_file(temp_file_path),
+                            task_prompt="OCR",
+                            text_input=None,
+                            model_id="microsoft/Florence-2-large",
+                            api_name="/process_image"
+                            )
+            Path(temp_file_path).unlink() # Delete tempfile
+            # Format OCR result
+            ocr_text = ''
+            if len(result) >= 1:
+                result_text = result[0]
+                # ocr_result_dict = json.loads(result_text.replace("'", '"')) 
+                # ocr_text = ocr_result_dict['<OCR>']
+                key = "'<OCR>': "
+                start_index = result_text.find(key) + len(key) + 1
+                end_index = result_text.rfind("}") - 1
+                ocr_text = result_text[start_index:end_index]
+                ocr_text = ocr_text.replace("\\n", "")
+                print(f'detected text: {ocr_text}')
+            return ocr_text
+        except Exception:
+            print("Error: Unable to to get text from image")
     
     def detect_license(self, image):
         results = self.license_model.predict( 
@@ -74,7 +85,7 @@ class LicensePlate(metaclass=SingletonMeta):
                     x1, y1, x2, y2 = map(int, coordinates)
                     cropped_image = image[y1:y2, x1:x2]
                     #Run Florence on image and get OCR text
-                    ocr_text = self.run_ocr(cropped_image)
+                    ocr_text = self.image_to_text(cropped_image)
                     # Overlay OCR text on the annotated frame with white bg
                     font_scale = 1  
                     thickness = 2
