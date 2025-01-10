@@ -53,17 +53,8 @@ class LicensePlate(metaclass=SingletonMeta):
                             )
             Path(temp_file_path).unlink() # Delete tempfile
             # Format OCR result
-            ocr_text = ''
-            if len(result) >= 1:
-                result_text = result[0]
-                # ocr_result_dict = json.loads(result_text.replace("'", '"')) 
-                # ocr_text = ocr_result_dict['<OCR>']
-                key = "'<OCR>': "
-                start_index = result_text.find(key) + len(key) + 1
-                end_index = result_text.rfind("}") - 1
-                ocr_text = result_text[start_index:end_index]
-                ocr_text = ocr_text.replace("\\n", "")
-                print(f'detected text: {ocr_text}')
+            ocr_result_dict = json.loads(result[0].replace("'", '"')) 
+            ocr_text = ocr_result_dict['<OCR>']
             return ocr_text
         except Exception:
             print("Error: Unable to to get text from image")
